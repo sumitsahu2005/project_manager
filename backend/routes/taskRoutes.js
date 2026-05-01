@@ -7,7 +7,7 @@ const {
   updateTask,
   deleteTask,
 } = require('../controllers/taskController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Note: /api/projects/:projectId/tasks routing is handled in server.js or projectRoutes,
 // but let's assume we map /api/tasks to this router and handle specific project tasks here
@@ -16,8 +16,8 @@ const { protect, admin } = require('../middleware/authMiddleware');
 
 // Routes for specific tasks
 router.route('/:id')
-  .put(protect, admin, updateTask)
-  .delete(protect, admin, deleteTask);
+  .put(protect, authorize('Admin'), updateTask)
+  .delete(protect, authorize('Admin'), deleteTask);
 
 router.route('/:id/status')
   .put(protect, updateTaskStatus);

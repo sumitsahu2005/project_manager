@@ -7,23 +7,23 @@ const {
   deleteProject,
   addMember,
 } = require('../controllers/projectController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect, authorize } = require('../middleware/authMiddleware');
 
 router.route('/')
   .get(protect, getProjects)
-  .post(protect, admin, createProject);
+  .post(protect, authorize('Admin'), createProject);
 
 router.route('/:id')
   .get(protect, getProjectById)
-  .delete(protect, admin, deleteProject);
+  .delete(protect, authorize('Admin'), deleteProject);
 
 router.route('/:id/members')
-  .put(protect, admin, addMember);
+  .put(protect, authorize('Admin'), addMember);
 
 const { getTasks, createTask } = require('../controllers/taskController');
 
 router.route('/:projectId/tasks')
   .get(protect, getTasks)
-  .post(protect, admin, createTask);
+  .post(protect, authorize('Admin'), createTask);
 
 module.exports = router;

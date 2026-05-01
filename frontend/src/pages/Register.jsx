@@ -8,7 +8,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('Admin'); // Defaulting to Admin for testing
+  const [role, setRole] = useState('Member');
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -93,13 +93,12 @@ const Register = () => {
               <select
                 id="role"
                 name="role"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
+                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-slate-300 placeholder-slate-500 text-slate-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white"
               >
-                <option value="Admin">Admin (Can create projects)</option>
-                <option value="Member">Member (Can only view tasks)</option>
+                <option value="Member">Member</option>
+                <option value="Admin">Admin</option>
               </select>
             </div>
           </div>

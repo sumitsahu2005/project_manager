@@ -5,18 +5,9 @@ const Project = require('../models/Project');
 // @access  Private
 const getProjects = async (req, res) => {
   try {
-    let projects;
-    if (req.user.role === 'Admin') {
-      // Admins see projects they own or are members of
-      projects = await Project.find({
-        $or: [{ owner: req.user._id }, { members: req.user._id }],
-      }).populate('owner', 'name email').populate('members', 'name email');
-    } else {
-      // Members only see projects they are members of
-      projects = await Project.find({
-        members: req.user._id,
-      }).populate('owner', 'name email').populate('members', 'name email');
-    }
+    const projects = await Project.find({
+      $or: [{ owner: req.user._id }, { members: req.user._id }],
+    }).populate('owner', 'name email').populate('members', 'name email');
     res.json(projects);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -57,13 +48,19 @@ const getProjectById = async (req, res) => {
 // @access  Private/Admin
 const createProject = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, members } = req.body;
+
+    // Ensure the creator is always a member
+    let projectMembers = [req.user._id];
+    if (members && Array.isArray(members)) {
+      projectMembers = [...new Set([...projectMembers, ...members])];
+    }
 
     const project = new Project({
       title,
       description,
       owner: req.user._id,
-      members: [req.user._id], // Add creator as a member by default
+      members: projectMembers,
     });
 
     const createdProject = await project.save();

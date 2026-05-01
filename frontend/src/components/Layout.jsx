@@ -94,7 +94,6 @@ const Layout = () => {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-slate-400">{user?.role}</p>
               </div>
             </div>
             <button

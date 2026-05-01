@@ -22,7 +22,12 @@ const getTasks = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to view tasks' });
     }
 
-    const tasks = await Task.find({ project: req.params.projectId }).populate(
+    let query = { project: req.params.projectId };
+    if (req.user.role === 'Member') {
+      query.assignedTo = req.user._id;
+    }
+
+    const tasks = await Task.find(query).populate(
       'assignedTo',
       'name email'
     );

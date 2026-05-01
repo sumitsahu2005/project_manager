@@ -6,28 +6,16 @@ const Project = require('../models/Project');
 // @access  Private
 const getDashboardStats = async (req, res) => {
   try {
-    let projects;
-    
-    if (req.user.role === 'Admin') {
-      projects = await Project.find({
-        $or: [{ owner: req.user._id }, { members: req.user._id }],
-      });
-    } else {
-      projects = await Project.find({
-        members: req.user._id,
-      });
-    }
+    const projects = await Project.find({
+      $or: [{ owner: req.user._id }, { members: req.user._id }],
+    });
 
     const projectIds = projects.map((p) => p._id);
 
-    // Get tasks for these projects
-    // For members, optionally only show tasks assigned to them? 
-    // Usually, members can see all tasks in a project they are part of.
+    // For members, only show tasks assigned to them
     let tasksQuery = { project: { $in: projectIds } };
-    
     if (req.user.role === 'Member') {
-      // If we want members to only see their stats, uncomment below:
-      // tasksQuery.assignedTo = req.user._id;
+      tasksQuery.assignedTo = req.user._id;
     }
 
     const tasks = await Task.find(tasksQuery);

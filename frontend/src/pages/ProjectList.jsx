@@ -15,6 +15,8 @@ const ProjectList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedMembers, setSelectedMembers] = useState([]);
 
   const fetchProjects = async () => {
     try {
@@ -29,16 +31,28 @@ const ProjectList = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+    const fetchUsers = async () => {
+      if (user?.role === 'Admin') {
+        try {
+          const { data } = await api.get('/users');
+          setAllUsers(data);
+        } catch (error) {
+          toast.error('Failed to load users');
+        }
+      }
+    };
+    fetchUsers();
+  }, [user]);
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/projects', { title, description });
+      await api.post('/projects', { title, description, members: selectedMembers });
       toast.success('Project created successfully!');
       setIsModalOpen(false);
       setTitle('');
       setDescription('');
+      setSelectedMembers([]);
       fetchProjects();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create project');
@@ -85,9 +99,7 @@ const ProjectList = () => {
           <FolderKanban className="mx-auto h-12 w-12 text-slate-400 mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">No projects found</h3>
           <p className="mt-1 text-slate-500">
-            {user?.role === 'Admin' 
-              ? 'Get started by creating a new project.' 
-              : 'Ask an Admin to create a project for you.'}
+            Get started by creating a new project.
           </p>
         </div>
       ) : (
@@ -167,6 +179,25 @@ const ProjectList = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Select Members</label>
+                <select
+                  multiple
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none h-24"
+                  value={selectedMembers}
+                  onChange={(e) => {
+                    const values = Array.from(e.target.selectedOptions, option => option.value);
+                    setSelectedMembers(values);
+                  }}
+                >
+                  {allUsers.map((u) => (
+                    <option key={u._id} value={u._id}>
+                      {u.name} ({u.email})
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-slate-500 mt-1">Hold Ctrl (Windows) or Cmd (Mac) to select multiple members.</p>
               </div>
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100">
                 <button

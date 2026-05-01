@@ -20,6 +20,7 @@ const TaskList = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [assignedTo, setAssignedTo] = useState('');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -62,12 +63,14 @@ const TaskList = () => {
         title,
         description,
         dueDate,
+        assignedTo: assignedTo || null,
       });
       toast.success('Task created successfully!');
       setIsModalOpen(false);
       setTitle('');
       setDescription('');
       setDueDate('');
+      setAssignedTo('');
       // Refresh tasks
       const { data } = await api.get(`/projects/${selectedProject}/tasks`);
       setTasks(data);
@@ -99,7 +102,12 @@ const TaskList = () => {
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-medium text-slate-900">{task.title}</h4>
       </div>
-      <p className="text-sm text-slate-600 mb-4 line-clamp-2">{task.description}</p>
+      <p className="text-sm text-slate-600 mb-3 line-clamp-2">{task.description}</p>
+      {task.assignedTo && (
+        <div className="text-xs text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-md font-medium mb-3 border border-blue-100">
+          👤 {task.assignedTo.name || 'Unknown'}
+        </div>
+      )}
       <div className="flex items-center justify-between text-xs text-slate-500">
         <div className="flex items-center">
           <Calendar className="w-4 h-4 mr-1" />
@@ -122,6 +130,8 @@ const TaskList = () => {
     </div>
   );
 
+  const currentProjectObj = projects.find(p => p._id === selectedProject);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -138,7 +148,7 @@ const TaskList = () => {
             ))}
           </select>
           
-          {user?.role === 'Admin' && selectedProject && (
+          {selectedProject && user?.role === 'Admin' && (
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -244,6 +254,19 @@ const TaskList = () => {
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Assign To</label>
+                <select
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {currentProjectObj?.members?.map(member => (
+                    <option key={member._id} value={member._id}>{member.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex justify-end space-x-3 pt-4 border-t border-slate-100">
                 <button
